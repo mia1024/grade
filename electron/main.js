@@ -59,7 +59,6 @@ app.on('window-all-closed', function () {
     }
     let s=JSON.stringify(toDump,null,4)
     fs.writeFileSync('cookies.json',s)
-    console.log(cookies)
   })
 })
 

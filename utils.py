@@ -39,7 +39,7 @@ def get_headers():
         server=socketserver.TCPServer(('localhost',8003),H)
         webbrowser.open('localhost:8003')
         server.serve_forever()
-        print(headers)
+        print("Headers:",headers,file = sys.stderr)
         json.dump(headers, open('headers.json','w'),indent = 4)
         return headers
 
@@ -59,6 +59,6 @@ def get_cookies():
         p=subprocess.Popen(f'{bin_loc}/electron electron',shell = True, stderr=open(os.devnull,'w'))
         p.wait()
         j=json.load(open('cookies.json',))
-        print(j)
+        print('Cookies:',j,file = sys.stderr)
         return j
 
