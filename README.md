@@ -1,6 +1,6 @@
 # Grade (gradescope without scope)
 
-Experimental project. Stabilities not gauranteed.
+Experimental project. Stabilities very much not guaranteed. Tested on Arch Linux with Python3.9.
 
 ## Dependencies
 
@@ -40,3 +40,11 @@ Homework 4 (HMC Chemistry 23B SP21): 17:00 PM
                       Assignments due on Friday, Apr 23                       
 Chem Study Consent Form (HMC Chemistry 23B SP21): 18:00 PM
 ```
+
+## Note on course names
+
+A file named `courses.json` will be generated under the repository root after running 
+the program for the first time. Feel free to edit it and remove courses you don't care
+about. In fact, you are encouraged to remove those courses to conserve bandwidths. If 
+you want to change the display name of the course in the output , simply change the 
+`name` field in the json file. 
