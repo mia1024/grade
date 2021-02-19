@@ -255,5 +255,6 @@ dist
 .pnp.*
 cookies.json
 headers.json
+courses.json
 *.ipynb
 
