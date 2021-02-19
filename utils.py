@@ -22,7 +22,7 @@ def get_headers():
                 data=self.request.recv(8192).decode()
                 self.request.send(
                     b'HTTP/1.1 404 Not Found\nContent-Type:text/html\nContent-Length:24\n\n<script>close()</script>\n'
-                )
+                ) # 404 so the page is not cached...it shouldn't be anyway
                 for line in data.splitlines():
                     if line.startswith('GET'):
                         continue
@@ -37,7 +37,10 @@ def get_headers():
                 threading.Thread(target = self.server.shutdown,args = ()).start()
         socketserver.TCPServer.allow_reuse_address = True
         server=socketserver.TCPServer(('localhost',8003),H)
-        webbrowser.open('localhost:8003')
+        try:
+            webbrowser.open('http://localhost:8003')
+        except:
+            print('Cannot open a browser for you. Please manually launch your favorite browser and navigate to http://localhost:8003',file = sys.stderr)
         server.serve_forever()
         print("Headers:",headers,file = sys.stderr)
         json.dump(headers, open('headers.json','w'),indent = 4)

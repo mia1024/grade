@@ -41,10 +41,26 @@ Homework 4 (HMC Chemistry 23B SP21): 17:00 PM
 Chem Study Consent Form (HMC Chemistry 23B SP21): 18:00 PM
 ```
 
-## Note on course names
+## Note on course list and names
 
 A file named `courses.json` will be generated under the repository root after running 
 the program for the first time. Feel free to edit it and remove courses you don't care
 about. In fact, you are encouraged to remove those courses to conserve bandwidths. If 
 you want to change the display name of the course in the output , simply change the 
 `name` field in the json file. 
+
+## Note on Electron
+
+The primary purpose of electron at this stage is to determine the cookies sent by Gradescope. 
+If you don't want to install it for such a trivial purpose, you can manually create a file 
+named `cookies.json` with a single key-value mapping of the cookies from gradescope, which you 
+can extract from your browser. The file should look like this
+```json
+{
+    "_ga": "[REDACTED]",
+    "_gid": "[REDACTED]",
+    "signed_token": "[REDACTED]",
+    "remember_me": "[REDACTED]",
+    "_gradescope_session": "[REDACTED]"
+}
+```

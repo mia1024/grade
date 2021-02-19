@@ -35,6 +35,9 @@ def get_courses_list():
         req = requests.get('https://gradescope.com/', headers = headers, cookies = cookies)
         req.raise_for_status()
         soup = bs4.BeautifulSoup(req.text, 'html.parser')
+        beg=soup.find('h1',attrs = {'class':'pageHeading'})
+        if beg.text=='Instructor Courses':
+            beg=beg.find_next('h1',attrs = {'class':'pageHeading'})
         # <a class="courseBox" href="$link">
         #     <h3 class="courseBox--shortname">$name</h3>
         #     <h4 class="courseBox--name">$desc</h4>
@@ -42,7 +45,9 @@ def get_courses_list():
         #     <!-- the courseBox--assignments can be safely ignored because we are crawling all pages
         #     for grades anyway -->
         # </a>
-        term = soup.find_all('h2', attrs = {'class': 'courseList--term'})
+        term = beg.find_all_next('h2', attrs = {'class': 'courseList--term'})
+        current_term=term[0].text
+        print('Current term is', current_term,file = sys.stderr)
         for t in term[::-1]:
             year = int(re.search(r'\d{4}', t.text).group(0))
             for tag in t.find_all_next('a', attrs = {'class': 'courseBox'}):
@@ -52,10 +57,13 @@ def get_courses_list():
                 if link in visited_links:
                     break
                 visited_links.add(link)
-                d = {'name': name, 'desc': desc, 'year': year, 'link': link}
-                courses.append(Course(name, desc, year, link))
-                print(f'Course discovered: {name} ({desc})', file = sys.stderr)
-                json_objs.append(d)
+                if t.text!=current_term:
+                    print(f'Course {name} ({desc}) from past terms ({t.text}) ignored', file = sys.stderr)
+                else:
+                    print(f'Course discovered: {name} ({desc}) at {link}', file = sys.stderr)
+                    d = {'name': name, 'desc': desc, 'year': year, 'link': link}
+                    courses.append(Course(name, desc, year, link))
+                    json_objs.append(d)
         json.dump(json_objs, open('courses.json', 'w'),indent = 4)
     return courses
 
@@ -101,15 +109,6 @@ def parse_course(course, html):
     assignments = []
     for row in rows:
         try:
-            release_date = row.find(attrs = {'class': 'submissionTimeChart--releaseDate'}).text
-            dues = row.find_all(attrs = {'class': 'submissionTimeChart--dueDate'})
-            due_date = parse_date(dues[0].text,course.year)
-            if len(dues) == 2:
-                late_due_date = dues[1].text
-                assert late_due_date.startswith('Late Due Date: ')
-                late_due_date = parse_date(late_due_date,course.year)
-            else:
-                late_due_date = None
             try:
                 name = row.find('th')
                 a = name.find('a')
@@ -119,6 +118,18 @@ def parse_course(course, html):
                     name = name.text  # overdue unsubmitted assignment
             except AttributeError:
                 name = row.find('button').text  # pending assignment
+            try:
+                dues = row.find_all(attrs = {'class': 'submissionTimeChart--dueDate'})
+                due_date = parse_date(dues[0].text,course.year)
+                if len(dues) == 2:
+                    late_due_date = dues[1].text
+                    assert late_due_date.startswith('Late Due Date: ')
+                    late_due_date = parse_date(late_due_date,course.year)
+                else:
+                    late_due_date = None
+            except AttributeError:
+                print(f'No due date found on {name} ({course.name}). Ignored.')
+
 
             grade = row.find('td', attrs = {'class': 'submissionStatus'})
             submitted = grade.find('div', attrs = {'class': 'submissionStatus--text'})
@@ -129,10 +140,9 @@ def parse_course(course, html):
             else:
                 submitted = submitted.text == 'Submitted'
             assignments.append(Assignment(course, name, due_date, late_due_date, submitted, grade))
-        except Exception as e:
-            print("Cannot parse an assignemnt from", course.name,file = sys.stderr)
-            print("Error:", traceback.format_exc(),file = sys.stderr)
-            print("Raw html is", row.prettify(),file = sys.stderr)
+        except:
+            print(f"Cannot parse an assignment from {course.name}. Raw HTML is",file = sys.stderr)
+            print(row.prettify(),file = sys.stderr)
     return assignments
 
 
