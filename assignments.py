@@ -54,6 +54,7 @@ def get_courses_list():
                 visited_links.add(link)
                 d = {'name': name, 'desc': desc, 'year': year, 'link': link}
                 courses.append(Course(name, desc, year, link))
+                print(f'Course discovered: {name} ({desc})', file = sys.stderr)
                 json_objs.append(d)
         json.dump(json_objs, open('courses.json', 'w'),indent = 4)
     return courses
@@ -136,7 +137,6 @@ async def retrieve_assignments(courses_list):
     assignments = []
 
     async def make_request(course):
-        print(f'retrieving {course.name}',file = sys.stderr)
         rep = await session.get('https://gradescope.com' + course.link, headers = headers, cookies = cookies)
         assert rep.status == 200
         html = await rep.text()
