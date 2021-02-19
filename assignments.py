@@ -91,9 +91,13 @@ def parse_date(date: str,year):
 
 
 def parse_course(course, html):
-    soup = bs4.BeautifulSoup(html, 'html.parser')
-    table = soup.find('table', attrs = {'id': 'assignments-student-table'}).find('tbody')
-    rows = table.find_all('tr')
+    try:
+        soup = bs4.BeautifulSoup(html, 'html.parser')
+        table = soup.find('table', attrs = {'id': 'assignments-student-table'}).find('tbody')
+        rows = table.find_all('tr')
+    except:
+        print(f"Nothing found under course {course.name}",file = sys.stderr)
+        return []
     assignments = []
     for row in rows:
         try:
