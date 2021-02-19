@@ -1,8 +1,10 @@
 {
   "name": "grade",
+  "author": "Mia Celeste",
   "version": "1.0.0",
   "description": "Gradescope without scope",
   "main": "index.ts",
+  "license": "MIT",
   "scripts": {
     "build": "webpack"
   },
@@ -10,7 +12,6 @@
     "type": "git",
     "url": "git+https://github.com/mia1024/grade.git"
   },
-  "author": "Mia Celeste",
   "bugs": {
     "url": "https://github.com/mia1024/grade/issues"
   },
