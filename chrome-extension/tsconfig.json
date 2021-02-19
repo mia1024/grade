@@ -1,0 +1,12 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "es6",
+    "sourceMap": false,
+    "module": "es6",
+    "removeComments": true,
+    "esModuleInterop": true,
+  },
+  "allowSyntheticDefaultImports": true,
+  "include": ["src/*.ts"],
+}
