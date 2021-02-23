@@ -2,9 +2,7 @@ import asyncio
 import datetime
 import json
 import re
-import traceback
-from collections import namedtuple
-from typing import List
+from typing import List,NamedTuple
 import sys
 
 import aiohttp
@@ -16,12 +14,22 @@ from utils import get_cookies, get_headers
 headers = get_headers()
 cookies = get_cookies()
 
-Course = namedtuple("Course", ('name', 'desc', 'year', 'link'))
-Assignment = namedtuple("Assignment", ('course', 'name', 'deadline', 'late_deadline', 'submitted', 'grade'))
+class Course(NamedTuple):
+    name:str
+    desc:str
+    year:int
+    link:str
+
+class Assignment(NamedTuple):
+    course:Course
+    name:str
+    deadline:datetime.datetime
+    late_deadline:datetime.datetime
+    submitted:bool
+    grade:str
 
 
-
-def get_courses_list():
+def get_courses_list() -> List[Course]:
     courses = []
     try:
         j = json.load(open('courses.json', ))
@@ -29,15 +37,15 @@ def get_courses_list():
             courses.append(Course(obj['name'], obj['desc'], obj['year'], obj['link']))
         return courses
     except:
-        print('Courses list not found in cache. Retrieving...',file = sys.stderr)
+        print('Courses list not found in cache. Retrieving...', file = sys.stderr)
         json_objs = []
-        visited_links=set()
+        visited_links = set()
         req = requests.get('https://gradescope.com/', headers = headers, cookies = cookies)
         req.raise_for_status()
         soup = bs4.BeautifulSoup(req.text, 'html.parser')
-        beg=soup.find('h1',attrs = {'class':'pageHeading'})
-        if beg.text=='Instructor Courses':
-            beg=beg.find_next('h1',attrs = {'class':'pageHeading'})
+        beg = soup.find('h1', attrs = {'class': 'pageHeading'})
+        if beg.text == 'Instructor Courses':
+            beg = beg.find_next('h1', attrs = {'class': 'pageHeading'})
         # <a class="courseBox" href="$link">
         #     <h3 class="courseBox--shortname">$name</h3>
         #     <h4 class="courseBox--name">$desc</h4>
@@ -46,8 +54,8 @@ def get_courses_list():
         #     for grades anyway -->
         # </a>
         term = beg.find_all_next('h2', attrs = {'class': 'courseList--term'})
-        current_term=term[0].text
-        print('Current term is', current_term,file = sys.stderr)
+        current_term = term[0].text
+        print('Current term is', current_term, file = sys.stderr)
         for t in term[::-1]:
             year = int(re.search(r'\d{4}', t.text).group(0))
             for tag in t.find_all_next('a', attrs = {'class': 'courseBox'}):
@@ -57,18 +65,18 @@ def get_courses_list():
                 if link in visited_links:
                     break
                 visited_links.add(link)
-                if t.text!=current_term:
+                if t.text != current_term:
                     print(f'Course {name} ({desc}) from past terms ({t.text}) ignored', file = sys.stderr)
                 else:
                     print(f'Course discovered: {name} ({desc}) at {link}', file = sys.stderr)
                     d = {'name': name, 'desc': desc, 'year': year, 'link': link}
                     courses.append(Course(name, desc, year, link))
                     json_objs.append(d)
-        json.dump(json_objs, open('courses.json', 'w'),indent = 4)
+        json.dump(json_objs, open('courses.json', 'w'), indent = 4)
     return courses
 
 
-def parse_date(date: str,year):
+def parse_date(date: str, year: int) -> datetime.datetime:
     # sadly strptime can't handle this
     months = {'jan': 1,
               'feb': 2,
@@ -98,13 +106,13 @@ def parse_date(date: str,year):
                              minute = minute)
 
 
-def parse_course(course, html):
+def parse_course(course: Course, html) -> List[Assignment]:
     try:
         soup = bs4.BeautifulSoup(html, 'html.parser')
         table = soup.find('table', attrs = {'id': 'assignments-student-table'}).find('tbody')
         rows = table.find_all('tr')
     except:
-        print(f"Nothing found under course {course.name}",file = sys.stderr)
+        print(f"Nothing found under course {course.name}", file = sys.stderr)
         return []
     assignments = []
     for row in rows:
@@ -120,16 +128,15 @@ def parse_course(course, html):
                 name = row.find('button').text  # pending assignment
             try:
                 dues = row.find_all(attrs = {'class': 'submissionTimeChart--dueDate'})
-                due_date = parse_date(dues[0].text,course.year)
+                due_date = parse_date(dues[0].text, course.year)
                 if len(dues) == 2:
                     late_due_date = dues[1].text
                     assert late_due_date.startswith('Late Due Date: ')
-                    late_due_date = parse_date(late_due_date,course.year)
+                    late_due_date = parse_date(late_due_date, course.year)
                 else:
                     late_due_date = None
             except AttributeError:
                 print(f'No due date found on {name} ({course.name}). Ignored.')
-
 
             grade = row.find('td', attrs = {'class': 'submissionStatus'})
             submitted = grade.find('div', attrs = {'class': 'submissionStatus--text'})
@@ -141,12 +148,12 @@ def parse_course(course, html):
                 submitted = submitted.text == 'Submitted'
             assignments.append(Assignment(course, name, due_date, late_due_date, submitted, grade))
         except:
-            print(f"Cannot parse an assignment from {course.name}. Raw HTML is",file = sys.stderr)
-            print(row.prettify(),file = sys.stderr)
+            print(f"Cannot parse an assignment from {course.name}. Raw HTML is", file = sys.stderr)
+            print(row.prettify(), file = sys.stderr)
     return assignments
 
 
-async def retrieve_assignments(courses_list):
+async def retrieve_assignments(courses_list:List[Course]) -> List[Assignment]:
     session = aiohttp.ClientSession()
     assignments = []
 
