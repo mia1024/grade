@@ -166,8 +166,10 @@ async def retrieve_assignments(courses_list:List[Course]) -> List[Assignment]:
     fut = []
     for c in courses_list:
         fut.append(make_request(c))
-    await asyncio.gather(*fut)
-    await session.close()
+    try:
+        await asyncio.gather(*fut)
+    finally:
+        await session.close()
     return assignments
 
 

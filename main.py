@@ -19,11 +19,31 @@ for a in pending_assignments:
 for v in d.values():
     v.sort(key = lambda a:a.deadline.time())
 
-for key in sorted(d.keys()):
-    print('-'*78)
-    print(f'{"Assignments due on "+key.strftime("%A, %b %-d"): ^78}')
+for key in sorted(d.keys()): #TODO: display late deadlines regardless
+    print('─'*79)
+    print(f'{key.strftime("%A, %b %-d"): ^78}')
     for a in d[key]:
+        course=f'{a.name} ({a.course.name})'
         if now<=a.deadline:
-            print(f'{a.name} ({a.course.name}): {a.deadline.strftime("%-I:%M %p")}')
+            if a.late_deadline:
+                extension=a.late_deadline-a.deadline
+                if extension > datetime.timedelta(seconds = 0):
+                    # apparently some assignments can have late deadlines before
+                    # the actual deadline
+                    ext=''
+                    hr=0
+                    if extension.days > 2:
+                        ext+=str(extension.days)+'d'
+                    else:
+                        hr+=extension.days*24
+                    hr+=extension.seconds/60
+                    if hr:
+                        ext+=str(round(hr,not float(hr).is_integer() or None))+'hr'
+                    print(f'{course:<55}{a.deadline.strftime("%I:%M %p")} (late +{ext})')
+                else:
+                    print(f'{course:<55}{a.deadline.strftime("%I:%M %p")}')
+            else:
+                print(f'{course:<55}{a.deadline.strftime("%I:%M %p")}')
         else:
-            print(f'{a.name} ({a.course.name}): {a.late_deadline.strftime("%-I:%M %p")} (late)')
+            print(f'{course:<55}{a.late_deadline.strftime("%I:%M %p")} \033[31m(late)\033[0m')
+    print()
