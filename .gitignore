@@ -256,5 +256,6 @@ dist
 cookies.json
 headers.json
 courses.json
+assignments.json
 *.ipynb
 

@@ -1,12 +1,34 @@
 from assignments import assignments,Assignment
 import datetime
 from collections import defaultdict
+import json
 
 pending_assignments=[]
 now=datetime.datetime.now()
-for a in assignments:
-    if (a.deadline > now or (a.late_deadline and a.late_deadline > now)) and not a.submitted:
-        pending_assignments.append(a)
+
+to_dump=defaultdict(dict)
+graded=[]
+try:
+    last_dump=json.load(open('assignments.json'))
+except:
+    last_dump= {}
+    for a in assignments:
+        if (a.deadline > now or (a.late_deadline and a.late_deadline > now)) and not a.submitted:
+            pending_assignments.append(a)
+        if a.grade:
+            to_dump[a.course.name][a.name]=a.grade
+else: # only display grades after a cache exists
+    for a in assignments:
+        if (a.deadline > now or (a.late_deadline and a.late_deadline > now)) and not a.submitted:
+            pending_assignments.append(a)
+        if a.grade:
+            to_dump[a.course.name][a.name]=a.grade
+            if a.course.name in last_dump and a.name not in last_dump[a.course.name]:
+                graded.append(a)
+
+graded.sort()
+
+json.dump(to_dump,open('assignments.json','w'),indent = 4)
 
 d=defaultdict(list)
 
@@ -18,7 +40,7 @@ for a in pending_assignments:
 
 for v in d.values():
     v.sort(key = lambda a:a.deadline.time())
-
+print('\033[2J\033[H',end = '',flush = True)
 for key in sorted(d.keys()): #TODO: display late deadlines regardless
     print('─'*79)
     print(f'{key.strftime("%A, %b %-d"): ^78}')
@@ -47,3 +69,11 @@ for key in sorted(d.keys()): #TODO: display late deadlines regardless
         else:
             print(f'{course:<55}{a.late_deadline.strftime("%I:%M %p")} \033[31m(late)\033[0m')
     print()
+
+if graded:
+    print('\033[97;46mAssignments graded since last run\033[0m')
+    for a in graded:
+        name=f'({a.course.name}) {a.name}'
+        # assuming gradescope doesn't send malicious payload in its grade
+        percent=round(eval(a.grade,{'__builtins__':{}},{})*100,1)
+        print(f'{name:<55} {a.grade.replace(" ",""):<12} ({percent}%)')
