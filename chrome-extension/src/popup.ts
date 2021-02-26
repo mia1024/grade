@@ -30,7 +30,7 @@ const now = new Date();
     let table = $("<table><tr><td>Name</td><td>Course</td><td>Deadline</td></tr></table>").appendTo(root);
     console.log(pending_assignments);
     for (let a of pending_assignments){
-        let link=$(`<td><a href="https://gradescope.com${a.action?a.action:a.course.link}" target="_blank">${a.name}</a></td>`)
+        let link=$(`<td><a href="https://gradescope.com${a.action?a.action:a.course.link+"#grade-click="+a.name}" target="_blank">${a.name}</a></td>`)
         let course=$(`<td>${a.course.name}</td>`)
         let deadline=$("<td>"+strftime(a.deadline,"%A, %b %d %I:%M %p")+"</td>");
         $("<tr>").append(link).append(course).append(deadline).appendTo(table);

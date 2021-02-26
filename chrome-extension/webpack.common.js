@@ -27,7 +27,8 @@ let config = {
     },
     entry:{
         popup:path.resolve(__dirname, 'src/popup.ts'),
-        background:path.resolve(__dirname, 'src/background.ts')
+        background:path.resolve(__dirname, 'src/background.ts'),
+        content:path.resolve(__dirname,'src/contentScript.ts')
     },
     output: {
         filename: '[name].js',
