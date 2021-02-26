@@ -1,6 +1,5 @@
 const path = require('path');
 const CopyPlugin = require("copy-webpack-plugin")
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 
 let config = {
     module: {
@@ -37,7 +36,7 @@ let config = {
     resolve: {
         extensions: ['.ts', '.ts', '.js'],
     },
-    devtool: 'cheap-module-source-map',
+    // devtool: 'cheap-module-source-map',
     plugins: [
         new CopyPlugin({
             patterns:[
@@ -50,7 +49,6 @@ let config = {
                 {from:"assets/icon256.png", to:path.resolve(__dirname,"dist","icon256.png")}
             ]
         }),
-        new MiniCssExtractPlugin(),
     ]
 };
 

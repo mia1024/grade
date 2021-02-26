@@ -1,4 +1,11 @@
 body {
-  width: 450px;
-  height: 450px;
+  width: calc(min(600px,40em));
+  //height: 450px;
+}
+
+a {
+  &,&:visited{
+    color: black;
+    text-decoration: underline dashed black;
+  }
 }

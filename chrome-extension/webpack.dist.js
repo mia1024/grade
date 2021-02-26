@@ -29,4 +29,5 @@ module.exports=merge(common,{
         new CleanWebpackPlugin( {}),
         new DeleteEverythingButZip(),
     ],
+    devtool: 'cheap-module-source-map',
 })

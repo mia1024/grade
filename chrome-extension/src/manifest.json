@@ -2,6 +2,7 @@
   "manifest_version": 2,
   "name": "Grade",
   "version": "0.1.0",
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "background": {
     "scripts": ["background.js"],
     "persistent": false
@@ -11,7 +12,7 @@
     "background",
     "cookies",
     "storage",
-    "https://*.gradescope.com/"
+    "https://www.gradescope.com/"
   ],
   "browser_action": {
     "default_title": "Show Gradescope summary",
