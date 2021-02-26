@@ -1,3 +1,3 @@
-import * as $ from "jquery";
-
-$.ajax()
+// import * as $ from "jquery";
+//
+// $.ajax()

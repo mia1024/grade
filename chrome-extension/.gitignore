@@ -1,4 +1,4 @@
 *.js
 *.js.map
-!webpack.config.js
+!webpack.common.js
 dist/
