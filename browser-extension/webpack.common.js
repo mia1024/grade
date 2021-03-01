@@ -17,7 +17,6 @@ let config = {
                     {
                         loader: "sass-loader",
                         options: {
-                            // Prefer `dart-sass`
                             implementation: require("node-sass"),
                         },
                     }

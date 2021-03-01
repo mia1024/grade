@@ -1,4 +1,3 @@
-import {getCookies} from "./cookies"
 import $ from "jquery";
 import {DOM, makeRequest} from "./utils";
 
@@ -16,7 +15,7 @@ function parseCourses(dom: DOM):Course[] {
         courseList=dom.find("div.courseList");
     }
     let courses:Course[]=[]
-    let first=true;
+    let isFirstBox=true;
     for (let term of courseList.find("h2")){
         let year=parseInt(term.innerText.match(/\d{4}/)[0],10);
         let courseBoxes=$(term).next('div.courseList--coursesForTerm');
@@ -30,10 +29,10 @@ function parseCourses(dom: DOM):Course[] {
                 year,
                 desc,
                 link,
-                active:first
+                active:isFirstBox
             })
         }
-        first=false;
+        isFirstBox=false;
     }
     return courses
 }
