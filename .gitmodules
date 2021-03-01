@@ -1,0 +1,6 @@
+[submodule "script"]
+	path = script
+	url = git@github.com:mia1024/grade-script.git
+[submodule "browser-extension"]
+	path = browser-extension
+	url = git@github.com:mia1024/grade-browser-extension.git

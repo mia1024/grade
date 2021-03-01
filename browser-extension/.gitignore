@@ -1,4 +1,0 @@
-*.js
-*.js.map
-!webpack.common.js
-dist/
